@@ -61,8 +61,28 @@ RcppExport SEXP cwbart(
    SEXP _inkeeptestme,
    SEXP _inkeeptreedraws,
    SEXP _inprintevery,
+
+   SEXP _iz,
+   SEXP _idistance,
+   SEXP _idistance_all,
+   SEXP _inew_loc,
+	
 //   SEXP _treesaslists,
-   SEXP _Xinfo
+   SEXP _Xinfo,
+
+   SEXP _range_select_sd,
+   SEXP _smoothness_select_sd,
+   SEXP _sigma2_prior_a,
+   SEXP _sigma2_prior_b,
+   SEXP _tau2_prior_a,
+   SEXP _tau2_prior_b,
+   SEXP _range,
+   SEXP _smoothness,
+   SEXP _tau2,
+   SEXP _range_prior_mean,
+   SEXP _range_prior_sd,
+   SEXP _smoothness_prior_mean,
+   SEXP _smoothness_prior_sd
 )
 {
 
