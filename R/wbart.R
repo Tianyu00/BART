@@ -52,7 +52,7 @@ coordinates='ll'
 {
 #--------------------------------------------------
 # locations in training set
-names(location)[1:2] = c('x', 'y')
+try(names(location)[1:2] = c('x', 'y')
 if (is.null(location_test)){} else {names(location_test)[1:2] = c('x', 'y')}
 unique.location = as.data.frame(unique(location))
 names(unique.location) = c('x', 'y')
@@ -99,7 +99,7 @@ if (nrow(unique(location)) == nrow(unique(rbind(location[,1:2],location_test))))
   ttest.Z.2 = as.matrix(ttest.Z.2[,2:ncol(ttest.Z.2)])
   z2 = ttest.Z.2[1:nrow(ttest.location),]
 }
-}
+})
 #Z2 = ttest.Z.2
 
 
