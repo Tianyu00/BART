@@ -31,9 +31,84 @@ ntree=200L, numcut=100L,
 ndpost=1000L, nskip=100L, keepevery=1L,
 nkeeptrain=ndpost, nkeeptest=ndpost,
 nkeeptestmean=ndpost, nkeeptreedraws=ndpost,
-printevery=100L, transposed=FALSE
+printevery=100L, transposed=FALSE,
+# new arguments
+location = NULL,
+location_test = NULL,
+range_select_sd=2.0, smoothness_select_sd=1.0,
+sigma2_prior_a=10.0,
+sigma2_prior_b=1.0,
+tau2_prior_a=2.0,
+tau2_prior_b=1.0,
+range=4.6,
+smoothness=0.0,
+tau2=2.0,
+range_prior_mean =5.0,
+range_prior_sd = 1.5,
+smoothness_prior_mean=0.0,
+smoothness_prior_sd=0.5,
+coordinates='ll'
 )
 {
+#--------------------------------------------------
+# locations in training set
+names(location)[1:2] = c('x', 'y')
+if (is.null(location_test)){} else {names(location_test)[1:2] = c('x', 'y')}
+unique.location = as.data.frame(unique(location))
+names(unique.location) = c('x', 'y')
+unique.location$id = 1:nrow(unique.location)
+location = merge(location, unique.location, by = c("x","y"), sort=FALSE)
+Z = fastDummies::dummy_columns(location$id)
+z = as.matrix(Z[,2:ncol(Z)])
+if (coordinates=='ground') distance = as.matrix (dist( unique.location[c("x",'y')] ))
+if (coordinates=='ll') distance = fields::rdist.earth(x1=unique.location[c("x",'y')] ,miles = FALSE)/100
+nn = nrow(unique.location)
+location <- as.matrix(location)
+z1 = z
+
+
+# locations in test set
+if (is.null(location_test)){
+new_loc = FALSE
+distance_all = distance
+z2 = NULL
+location_all = unique.location
+} else {
+if (nrow(unique(location)) == nrow(unique(rbind(location[,1:2],location_test)))){
+  new_loc = FALSE
+  location_all = unique.location
+  distance_all = distance
+  ttest.location = dplyr::left_join(location_test, unique.location, by = c("x","y"),sort=FALSE)
+  ttest.location <- rbind(ttest.location, unique.location)
+  ttest.Z = fastDummies::dummy_columns(ttest.location$id)
+  ttest.Z = as.matrix(ttest.Z[,2:ncol(ttest.Z)])
+  ttest.Z = ttest.Z[1:nrow(location_test),]
+  z2 = ttest.Z
+} else {
+  new_loc = TRUE
+  unique.location.all = rbind(dplyr::anti_join(unique(location_test[,1:2]),unique.location[,1:2],by=c('x','y'),sort=FALSE),unique.location[,1:2])
+  location_all = unique.location.all
+  if (coordinates=='ground') distance_all = as.matrix (dist( unique.location.all ))
+  if (coordinates=='ll') distance_all = fields::rdist.earth(x1=unique.location.all ,miles = FALSE)/100
+
+  unique.location.all$id = 1:nrow(unique.location.all)
+  ttest.location = left_join(location_test, unique.location.all, by = c("x","y"), sort=FALSE)
+  ttest.location.2 <- rbind(ttest.location,data.frame(x=rep(0,nrow(unique.location.all)),
+                                      y=rep(0,nrow(unique.location.all)),id=1:nrow(unique.location.all)))
+  ttest.Z.2 = fastDummies::dummy_columns(ttest.location.2$id)
+  ttest.Z.2 = as.matrix(ttest.Z.2[,2:ncol(ttest.Z.2)])
+  z2 = ttest.Z.2[1:nrow(ttest.location),]
+}
+}
+#Z2 = ttest.Z.2
+
+
+
+
+
+
+
+
 #--------------------------------------------------
 #data
 n = length(y.train)
@@ -114,7 +189,7 @@ if(is.na(sigmaf)) {
 #--------------------------------------------------
 ptm <- proc.time()
 #call
-res = .Call("cwbart",
+res = .Call("cwbart",PACKAGE="BART.sp",
             n,  #number of observations in training data
             p,  #dimension of x
             np, #number of observations in test data
@@ -147,9 +222,15 @@ res = .Call("cwbart",
             printevery,
             xinfo
 )
-    
+
 res$proc.time <- proc.time()-ptm
-    
+
+res$z1 = z1
+res$z2 = z2
+res$locations_train = unique.location
+res$locations_test = dplyr::anti_join(unique(location_test[,1:2]),unique.location[,1:2],by=c('x','y'),sort=FALSE)
+#res$location_all = ttest.location.2
+
 res$mu = fmean
 res$yhat.train.mean = res$yhat.train.mean+fmean
 res$yhat.train = res$yhat.train+fmean
