@@ -189,7 +189,7 @@ if(is.na(sigmaf)) {
 #--------------------------------------------------
 ptm <- proc.time()
 #call
-res = .Call("cwbart",PACKAGE="BART.sp",
+res = .Call("cwbart",PACKAGE="BART",
             n,  #number of observations in training data
             p,  #dimension of x
             np, #number of observations in test data
