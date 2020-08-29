@@ -220,7 +220,27 @@ res = .Call("cwbart",PACKAGE="BART",
             nkeeptestmean,
             nkeeptreedraws,
             printevery,
-            xinfo
+            
+            z,
+            distance,
+            distance_all,
+            new_loc,
+            
+            xinfo,
+            
+            range_select_sd,
+            smoothness_select_sd,
+            sigma2_prior_a,
+            sigma2_prior_b,
+            tau2_prior_a,
+            tau2_prior_b,
+            range,
+            smoothness,
+            tau2,
+            range_prior_mean,
+            range_prior_sd,
+            smoothness_prior_mean,
+            smoothness_prior_sd
 )
 
 res$proc.time <- proc.time()-ptm
